@@ -39,11 +39,13 @@ public class Connector
         {
             String proxyURL = parameters.getProperty(Constants.PROXY_HOST);
             int proxyPort = Integer.parseInt(parameters.getProperty(Constants.PROXY_PORT, "80"));
-            session = SlackSessionFactory.getSlackSessionBuilder(parameters.getProperty(Constants.BOT_TOKEN)).withProxy(Proxy.Type.HTTP, proxyURL, proxyPort).withAutoreconnectOnDisconnection(true).build();
+            SlackSessionFactory.SlackSessionFactoryBuilder slackSessionBuilder = SlackSessionFactory.getSlackSessionBuilder(parameters.getProperty(Constants.OAUTH_TOKEN), parameters.getProperty(Constants.APP_LEVEL_TOKEN));
+            session = slackSessionBuilder.withLegacyMode(Boolean.FALSE).withProxy(Proxy.Type.HTTP, proxyURL, proxyPort).withAutoreconnectOnDisconnection(true).withConnectionHeartbeat(365, TimeUnit.DAYS).build();
         }
         else
         {
-            session = SlackSessionFactory.createWebSocketSlackSession(parameters.getProperty(Constants.BOT_TOKEN));
+            SlackSessionFactory.SlackSessionFactoryBuilder slackSessionBuilder = SlackSessionFactory.getSlackSessionBuilder(parameters.getProperty(Constants.OAUTH_TOKEN), parameters.getProperty(Constants.APP_LEVEL_TOKEN));
+            session = slackSessionBuilder.withLegacyMode(Boolean.FALSE).withAutoreconnectOnDisconnection(true).withConnectionHeartbeat(365, TimeUnit.DAYS).build();
         }
         ReviewRequestService reviewRequestService = Connector.injector.getProvider(ReviewRequestService.class).get();
         GerritChangeInfoService gerritChangeInfoService = Connector.injector.getProvider(GerritChangeInfoService.class).get();
